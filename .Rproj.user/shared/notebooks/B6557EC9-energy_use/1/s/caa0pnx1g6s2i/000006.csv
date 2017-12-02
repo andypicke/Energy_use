@@ -1,0 +1,2 @@
+"0","model2 <- lm(therms~avgTemp,data=gas %>% filter(avgTemp<70))"
+"0","broom::tidy(model2)"

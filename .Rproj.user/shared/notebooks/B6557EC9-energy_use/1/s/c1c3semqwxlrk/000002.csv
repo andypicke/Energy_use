@@ -1,0 +1,8 @@
+"0","p1 <- gas %>% ggplot(aes(avgTemp,therms))+"
+"0","  geom_point()+"
+"0","  geom_smooth(method='lm')"
+"0","p2 <- gas %>% filter(avgTemp<70) %>% "
+"0","  ggplot(aes(avgTemp,therms))+"
+"0","  geom_point()+"
+"0","  geom_smooth(method='lm')"
+"0","gridExtra::grid.arrange(p1,p2)"

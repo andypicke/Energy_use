@@ -1,0 +1,2 @@
+"0","model1 <- lm(therms~avgTemp,data=gas)"
+"0","broom::tidy(model1)"
