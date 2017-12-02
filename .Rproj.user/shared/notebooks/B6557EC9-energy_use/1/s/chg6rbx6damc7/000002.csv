@@ -1,6 +1,0 @@
-"0","ele <- read.csv('data/xcel_elec.csv',stringsAsFactors = FALSE)"
-"0","ele <- ele %>% rename(Date=Last.Read.Date,kWh=Electric.Usage..kWh.,avgTemp=Average.Temperature) %>% "
-"0","  select(Date,kWh,avgTemp) %>% "
-"0","  mutate(Date=mdy(Date)) %>% "
-"0","  mutate(avgTemp=as.integer(gsub(""[^0-9]"", """", avgTemp) ))"
-"0","head(ele)"

@@ -1,7 +1,0 @@
-"0","# load gas data"
-"0","gas <- read.csv('data/xcel_gas.csv',stringsAsFactors = FALSE)"
-"0","gas <-gas %>% rename(Date=Last.Read.Date,therms=Gas.Usage..Therms.,avgTemp=Average.Temperature) %>% "
-"0","  select(Date,therms,avgTemp) %>% "
-"0","  mutate(Date=mdy(Date)) %>% "
-"0","  mutate(avgTemp=as.integer(gsub(""[^0-9]"", """", avgTemp) ))"
-"0","head(gas)"
