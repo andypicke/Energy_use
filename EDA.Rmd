@@ -1,6 +1,8 @@
 ---
-title: "Winter is coming "
+title: "EDA of Energy Usage Data"
 output: 
+  html_notebook: 
+    toc: yes
   html_document: 
     keep_md: yes
     theme: yeti
@@ -8,31 +10,15 @@ output:
 ---
 
 ```{r,echo=FALSE}
+
 knitr::opts_chunk$set(fig.width=12, fig.height=10,echo=TRUE, warning=FALSE, message=FALSE)
-
-#knitr::opts_knit$set(base.dir = "/Users/Andy/andypicke.github.io/", base.url = "/")
-#knitr::opts_chunk$set(fig.path = "images/energy_use/")
-
-#knitr::opts_chunk$set(fig.path = "/Users/Andy/andypicke.github.io/images/energy_use/")
 
 ```
       
-# Introduction
-
-Winter is coming, but for us that means higher energy bills, not [whitewalkers](http://gameofthrones.wikia.com/wiki/White_Walkers) :) . We've had a few unseasonably warm days and not much snow yet, but it's definitely colder and we are now using our heat almost every night. I thought it would be fun to explore our energy usage data in R. 
 
 
-# Data
-[Xcel energy](https://www.xcelenergy.com/) lets you download your monthly usage data as a csv file. However it is not in a format that is easy to read in to R; it's probably possible to write code to read in the sections you want, but it really just wasn't worth it for an analysis I might do once a year. So I just copied the data I wanted (date, energy use, and temperature) into a new clean spreadsheet.
+```{r libraries}
 
-Then I read the csv files into R and clean them up:
-* Rename columns
-* Convert Date to a date variable
-* remove degree signs from temperatures using gsub
-
-
-
-```{r}
 library(ggplot2)
 theme_set(theme_gray(base_size = 18))
 suppressPackageStartupMessages(library(dplyr))
@@ -45,12 +31,15 @@ suppressPackageStartupMessages(library(lubridate))
 # load gas data
 gas <- read.csv('data/xcel_gas.csv',stringsAsFactors = FALSE)
 gas <-gas %>% rename(Date=Last.Read.Date,therms=Gas.Usage..Therms.,avgTemp=Average.Temperature) %>% 
-  select(Date,therms,avgTemp) %>% 
+  select(Date,therms,avgTemp,Heating.Degree.Days) %>% 
   mutate(Date=mdy(Date)) %>% 
   filter(!is.na(Date)) %>%
   mutate(Yr=as.factor(lubridate::year(Date))) %>%
   mutate(avgTemp=as.integer(gsub("[^0-9]", "", avgTemp) ))
 head(gas)
+
+gas$HDD <- gas$Heating.Degree.Days
+gas <- gas %>% select(-c(Heating.Degree.Days))
 
 ```
 
@@ -62,12 +51,15 @@ head(gas)
 ele <- read.csv('data/xcel_elec.csv',stringsAsFactors = FALSE)
 
 ele <- ele %>% rename(Date=Last.Read.Date,kWh=Electric.Usage..kWh.,avgTemp=Average.Temperature) %>% 
-  select(Date,kWh,avgTemp) %>% 
+  select(Date,kWh,avgTemp,Heating.Degree.Days,Cooling.Degree.Days) %>% 
   mutate(Date=mdy(Date)) %>% 
   filter(!is.na(Date)) %>%
   mutate(Yr=as.factor(lubridate::year(Date))) %>%
   mutate(avgTemp=as.integer(gsub("[^0-9]", "", avgTemp) ))
 
+ele$CDD<-ele$Cooling.Degree.Days
+ele$HDD <- ele$Heating.Degree.Days
+ele <- ele %>% select(-c(Heating.Degree.Days,Cooling.Degree.Days))
 head(ele)
 
 ```
@@ -98,6 +90,19 @@ p3 <-ele %>% ggplot(aes(Date,kWh))+
 gridExtra::grid.arrange(p1,p2,p3)
 
 ```
+
+### Energy use vs HDD and CDD
+```{r}
+gas %>% ggplot(aes(HDD,therms))+geom_point(size=4,aes(col=Yr))+geom_smooth(method='lm')
+```
+
+
+```{r}
+
+ele %>% ggplot(aes(HDD,kWh))+geom_point(size=4,aes(col=Yr))+geom_smooth(method='lm')
+#ele %>% ggplot(aes(CDD,kWh))+geom_point(size=4,aes(col=Yr))+geom_smooth(method='lm')
+```
+
 
 
 ### Energy use vs temperature

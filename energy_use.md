@@ -48,12 +48,12 @@ head(gas)
 
 ```
 ##         Date therms avgTemp   Yr
-## 1 2017-11-16     58      47 2017
-## 2 2017-10-18     37      54 2017
-## 3 2017-09-18      7      72 2017
-## 4 2017-08-17      5      71 2017
-## 5 2017-07-19      6      73 2017
-## 6 2017-06-19     17      63 2017
+## 1 2018-04-19     42      47 2018
+## 2 2018-03-21     73      39 2018
+## 3 2018-02-20     94      35 2018
+## 4 2018-01-19    103      34 2018
+## 5 2017-12-18     69      45 2017
+## 6 2017-11-16     58      47 2017
 ```
 
 
@@ -75,12 +75,12 @@ head(ele)
 
 ```
 ##         Date kWh avgTemp   Yr
-## 1 2017-11-16 340      47 2017
-## 2 2017-10-18 324      54 2017
-## 3 2017-09-18 376      72 2017
-## 4 2017-08-17 323      71 2017
-## 5 2017-07-19 331      73 2017
-## 6 2017-06-19 304      63 2017
+## 1 2018-04-19 418      47 2018
+## 2 2018-03-21 392      39 2018
+## 3 2018-02-20 468      35 2018
+## 4 2018-01-19 481      34 2018
+## 5 2017-12-18 494      45 2017
+## 6 2017-11-16 340      47 2017
 ```
 
 
@@ -110,7 +110,7 @@ p3 <-ele %>% ggplot(aes(Date,kWh))+
 gridExtra::grid.arrange(p1,p2,p3)
 ```
 
-![](/Users/Andy/andypicke.github.io/images/energy_use/unnamed-chunk-5-1.png)<!-- -->
+![](energy_use_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
 
 
 ### Energy use vs temperature
@@ -140,7 +140,7 @@ p2 <-  gas2 %>%
 gridExtra::grid.arrange(p1,p2)
 ```
 
-![](/Users/Andy/andypicke.github.io/images/energy_use/unnamed-chunk-6-1.png)<!-- -->
+![](energy_use_files/figure-html/unnamed-chunk-6-1.png)<!-- -->
 
 ### Linear regression vs Temperature
 
@@ -154,9 +154,9 @@ broom::tidy(model1)
 ```
 
 ```
-##          term   estimate std.error statistic      p.value
-## 1 (Intercept) 169.453948 8.3931827  20.18947 3.372132e-11
-## 2     avgTemp  -2.363515 0.1492451 -15.83647 7.055392e-10
+##          term   estimate  std.error statistic      p.value
+## 1 (Intercept) 170.107403 10.2314386  16.62595 3.854125e-10
+## 2     avgTemp  -2.367027  0.1936606 -12.22256 1.675853e-08
 ```
 
 #### Model w/ Only Temperature<70
@@ -167,9 +167,9 @@ broom::tidy(model2)
 ```
 
 ```
-##          term   estimate std.error statistic      p.value
-## 1 (Intercept) 185.057937 8.5847151  21.55668 1.030139e-09
-## 2     avgTemp  -2.705768 0.1665392 -16.24703 1.619307e-08
+##          term   estimate  std.error statistic      p.value
+## 1 (Intercept) 199.533665 13.8055013  14.45320 4.992949e-08
+## 2     avgTemp  -3.038635  0.2948149 -10.30693 1.204038e-06
 ```
 
 * Both models return estimates that are statistically significant (very small p-values). I'll use the model excluding temperatures <70, since we definitely don't use any gas heat in that range.
@@ -205,7 +205,7 @@ p2 <- ele %>% filter(kWh<450 & kWh>200) %>%
 gridExtra::grid.arrange(p1,p2)
 ```
 
-![](/Users/Andy/andypicke.github.io/images/energy_use/unnamed-chunk-9-1.png)<!-- -->
+![](energy_use_files/figure-html/unnamed-chunk-9-1.png)<!-- -->
 
 ### Linear Regression vs. temperature
 A linear regression of electricty use vs temperature shows no significant relationship (the slope pvalue is 0.5).
@@ -216,9 +216,9 @@ broom::tidy(model_ele)
 ```
 
 ```
-##          term    estimate std.error statistic      p.value
-## 1 (Intercept) 309.0315384  42.46164 7.2778985 1.586776e-05
-## 2     avgTemp   0.1460443   0.74769 0.1953273 8.486979e-01
+##          term    estimate  std.error  statistic      p.value
+## 1 (Intercept) 370.5800356 51.6799885  7.1706679 7.253763e-06
+## 2     avgTemp  -0.7734246  0.9367298 -0.8256646 4.238881e-01
 ```
 
 
