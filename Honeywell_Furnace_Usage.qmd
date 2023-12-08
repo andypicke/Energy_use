@@ -4,20 +4,19 @@ format: html
 editor: visual
 ---
 
-## 
-# Examine data from honeywell thermostat
-# Data are from emails giving monthly data on how many hours furnace ran, avg temperatures etc.
+
+- Examine data from honeywell thermostat
+- Data are from emails giving monthly data on how many hours furnace ran, avg temperatures etc.
 
 ```{r}
 
-library(tidyverse, quietly = TRUE)
+suppressPackageStartupMessages(library(tidyverse, quietly = TRUE))
 library(janitor)
 library(skimr)
-library(plotly)
-
+suppressPackageStartupMessages(library(plotly, quietly = TRUE))
 
 # read in data (downloaded from google sheet)
-hw <- readr::read_csv('./data/Honeywell_Heating_Usage .csv') |>
+hw <- readr::read_csv('./data/Honeywell_Heating_Usage .csv', show_col_types = FALSE) |>
   janitor::clean_names()
 
 hw$month <- as.factor(hw$month)
@@ -31,7 +30,11 @@ hw$month <- as.factor(hw$month)
 ```{r}
 
 hw %>% ggplot(aes(date,heating_usage_hours)) +
-  geom_col()
+  geom_col() +
+  labs(title = "Heating Usage Per Month",
+       x = "Month",
+       y = "Heating Usage [hours]")
+
 
 ```
 
@@ -40,8 +43,11 @@ hw %>% ggplot(aes(date,heating_usage_hours)) +
 
 ```{r}
 
-hw %>% ggplot(aes(month, heating_usage_hours, group=month, fill=as.factor(year))) + 
-  geom_col(position = 'dodge2')#+position_dodge()
+hw %>% ggplot(aes(month, heating_usage_hours, 
+                  group = month, 
+                  fill = as.factor(year))
+              ) + 
+  geom_col(position = 'dodge2')
 
 
 ```
@@ -53,26 +59,24 @@ hw %>%
   mutate(year = as.factor(year)) |>
   ggplot(aes(year, heating_usage_hours, fill = year)) +
   geom_col(position = 'dodge2') +
-  facet_wrap('month')
+  facet_wrap('month') +
+  scale_x_discrete(guide = guide_axis(angle = 45)) 
 ```
-
-```{r}
-# only complete years
-hwc <- hw %>% filter(Year>2018,Year<2023)
-hwc %>% ggplot(aes(Year,`Heating usage (hours)`,fill=as.factor(Year)))+
-  geom_col(position = 'dodge2')+
-  facet_wrap(hwc$Month)
-
-```
-
 
 
 # Boxplot of usage by month
 
 ```{r}
+#| label: fig-heating-boxplot
+#| fig-cap: "Boxplot of heating usage by month"
 
-hw %>% ggplot(aes(month, heating_usage_hours)) +
-  geom_boxplot(aes(group = month))
+hw %>% 
+  filter(!is.na(month)) |>
+  ggplot(aes(month, heating_usage_hours)) +
+  geom_boxplot(aes(group = month)) +
+  labs(title = "Heating Usage Per Month",
+       x = "Month",
+       y = "Heating Usage [hours]")
 
 ```
 
@@ -80,10 +84,14 @@ hw %>% ggplot(aes(month, heating_usage_hours)) +
 
 # Plot usage vs temp
 ```{r}
+#| label: fig-heating-vs-hightemp
+#| fig-cap: "Heating Hours vs Average Low Temperature"
 
-hw %>% ggplot(aes(avg_high_temp, heating_usage_hours)) +
-  geom_point() +
-  geom_smooth()
+hw %>% ggplot(aes(avg_low_temp, heating_usage_hours)) +
+  geom_point(size = 4, alpha = 0.25) +
+  labs(title = "Heating Hours vs Temperature",
+       x = "Avg Low Temperature",
+       y = "Heating Usage [hours]")
 
 
 ```
@@ -92,8 +100,11 @@ hw %>% ggplot(aes(avg_high_temp, heating_usage_hours)) +
 
 g <- hw %>% 
   mutate(year = as.factor(year)) |>
-  ggplot(aes(avg_high_temp, heating_usage_hours)) +
-  geom_point(size = 4, aes(colour = year) )
+  ggplot(aes(avg_low_temp, heating_usage_hours)) +
+  geom_point(size = 4, aes(colour = year) ) +
+  labs(title = "Heating Hours vs Temperature",
+       x = "Avg Low Temperature",
+       y = "Heating Usage [hours]")
 
 
 ggplotly(g)
@@ -103,13 +114,18 @@ ggplotly(g)
 # Plot usage vs temp separately by year
 
 ```{r}
-hw %>% ggplot(aes(avg_low_temp, heating_usage_hours)) +
-  geom_point() + 
-  geom_smooth(formula = 'y ~ x', method = 'lm') +
+
+g <- hw %>% 
+  filter(!is.na(year)) |>
+  filter(month %in% c(9,10,11,12,1,2,3,4,5,6)) |>
+  ggplot(aes(avg_low_temp, heating_usage_hours)) +
+  geom_point(size = 3, alpha = 0.3) +
   facet_wrap('year') +
   ylim(range(hw$heating_usage_hours, na.rm = TRUE)) +
   xlim(range(hw$avg_low_temp, na.rm = TRUE))
 
+
+ggplotly(g)
 ```
 
 
@@ -126,9 +142,8 @@ hw %>% group_by(year) |>
 ```{r}
 
 hw %>% group_by(month) %>% 
-  summarise(avg = mean(heating_usage_hours,na.rm = TRUE),
-            min = min(heating_usage_hours,na.rm = TRUE),
-            max = max(heating_usage_hours,na.rm = TRUE)) %>%
-  View() 
+  summarise(avg = mean(heating_usage_hours, na.rm = TRUE),
+            min = min(heating_usage_hours, na.rm = TRUE),
+            max = max(heating_usage_hours, na.rm = TRUE)) 
 ```
 
