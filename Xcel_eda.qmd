@@ -1,0 +1,159 @@
+---
+title: "EDA of Xcel Energy Data"
+format: html
+editor: visual
+---
+
+# Introduction
+
+EDA/analysis of xcel gas and electric data for our home. This is updated qmd version of what was originally EDA.Rmd.
+
+
+```{r}
+
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(janitor))
+
+```
+
+# Data
+
+
+## Gas 
+
+- Older data (up to 2019?) contained heating degree days etc
+```{r}
+
+# load gas data
+gas_old <- read.csv('data/xcel_gas.csv',stringsAsFactors = FALSE) |>
+  janitor::clean_names() |>
+  mutate(date = lubridate::mdy(last_read_date)) |>
+  mutate(average_temperature = as.integer(gsub("[^0-9]", "", average_temperature) ))
+
+
+```
+
+
+## Electricity
+```{r}
+
+elec_old <- read.csv('data/xcel_elec.csv', stringsAsFactors = FALSE) |>
+  janitor::clean_names() |>
+  mutate(date = mdy(last_read_date)) |>
+  mutate(average_temperature = as.integer(gsub("[^0-9]", "", average_temperature) ))
+
+head(elec_old)
+
+```
+
+
+# Analysis
+
+## Gas (old)
+
+### Vs time
+```{r}
+
+gas_old |>
+  ggplot(aes(date, gas_usage_therms)) +
+  geom_line(linewidth = 1.5) +
+  geom_point(size = 3)
+
+```
+
+### Gas vs HDD
+```{r}
+#| label: fig-gas-vs-hdd
+#| fig-cap: "Gas Use vs Heating Degree Days"
+
+gas_old |>
+  ggplot(aes(heating_degree_days, gas_usage_therms)) +
+  geom_point(size = 4, alpha = 0.3) +
+  geom_smooth(method = 'lm', formula = 'y ~ x') +
+  labs(title = "Gas Use vs Heating Degree Days",
+       x = 'Heating Degree days',
+       y = 'Gas Usage [therms]')
+
+```
+
+### Gas vs temperature
+
+```{r}
+#| label: fig-gas-vs-temp
+#| fig-cap: "Gas Use vs Temperature"
+
+gas_old |>
+  ggplot(aes(average_temperature, gas_usage_therms)) +
+  geom_point(size = 4, alpha = 0.3) +
+  labs(title = "Gas Use vs Temperature",
+       x = 'Average Temperature',
+       y = 'Gas Usage [therms]')
+
+```
+
+## Electricity (old)
+
+### vs time
+
+```{r}
+#| label: fig-electricity-vs-time
+#| fig-cap: "Electricy Use vs Time"
+
+elec_old |>
+  ggplot(aes(date, electric_usage_k_wh)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Electricy Use vs Time",
+       x = "Date",
+       y = "Electricity Use [kWh]")
+
+```
+
+
+### vs temperature
+
+```{r}
+#| label: fig-electricity-vs-temp
+#| fig-cap: "Electricy Use vs Temperature"
+
+elec_old |>
+  ggplot(aes(average_temperature, electric_usage_k_wh)) +
+  geom_point(size = 4, alpha = 0.5) +
+  labs(title = "Electricy Use vs Temperature",
+       x = "Average Temperature",
+       y = "Electricity Use [kWh]")
+
+```
+
+
+### vs Cooling Degree Days
+
+```{r}
+#| label: fig-electricity-vs-cdd
+#| fig-cap: "Electricy Use vs Cooling Degree Days"
+
+elec_old |>
+  ggplot(aes(cooling_degree_days, electric_usage_k_wh)) +
+  geom_point(size = 4, alpha = 0.5) +
+  labs(title = "Electricy Use vs Cooling Degree Days",
+       x = "Cooling Degree Days",
+       y = "Electricity Use [kWh]")
+
+```
+
+
+### vs Heating Degree Days
+
+```{r}
+#| label: fig-electricity-vs-hdd
+#| fig-cap: "Electricy Use vs Heating Degree Days"
+
+elec_old |>
+  ggplot(aes(heating_degree_days, electric_usage_k_wh)) +
+  geom_point(size = 4, alpha = 0.5) +
+  geom_smooth(method = 'lm', formula = 'y ~ x')
+  labs(title = "Electricy Use vs Heating Degree Days",
+       x = "Heating Degree Days",
+       y = "Electricity Use [kWh]") 
+
+```
